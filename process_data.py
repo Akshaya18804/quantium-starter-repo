@@ -1,35 +1,35 @@
 import pandas as pd
 from pathlib import Path
 
-# Path to data folder
 data_folder = Path("data")
-
-# Read all CSV files in the data folder
 csv_files = data_folder.glob("*.csv")
 
-dataframes = []
+all_data = []
 
 for file in csv_files:
     df = pd.read_csv(file)
 
-    # Keep only Pink Morsels
-    df = df[df["product"] == "Pink Morsels"]
+    # Keep only pink morsel rows (case-sensitive match)
+    df = df[df["product"] == "pink morsel"]
 
-    # Create Sales column
-    df["Sales"] = df["quantity"] * df["price"]
+    # Remove $ sign and convert price to float
+    df["price"] = df["price"].str.replace("$", "", regex=False).astype(float)
 
-    # Keep only required columns
+    # Calculate sales
+    df["Sales"] = df["price"] * df["quantity"]
+
+    # Keep required columns
     df = df[["Sales", "date", "region"]]
 
-    dataframes.append(df)
+    all_data.append(df)
 
-# Combine all data into one DataFrame
-final_df = pd.concat(dataframes, ignore_index=True)
+# Combine all three CSVs
+final_df = pd.concat(all_data, ignore_index=True)
 
-# Rename columns to match required output format
+# Rename columns
 final_df.columns = ["Sales", "Date", "Region"]
 
-# Save output file
+# Save output
 final_df.to_csv("pink_morsels_sales.csv", index=False)
 
-print("✅ Output file created: pink_morsels_sales.csv")
+print("✅ pink_morsels_sales.csv generated successfully")
